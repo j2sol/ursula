@@ -157,9 +157,13 @@ OPENSTACK_HYPERVISOR_FEATURES = {
 # The OPENSTACK_QUANTUM_NETWORK settings can be used to enable optional
 # services provided by quantum.  Currently only the load balancer service
 # is available.
-#OPENSTACK_QUANTUM_NETWORK = {
-#    'enable_lb': True
-#}
+OPENSTACK_QUANTUM_NETWORK = {
+    'enable_lb': False
+}
+
+OPENSTACK_NEUTRON_NETWORK = {
+    'enable_lb': False
+}
 
 # OPENSTACK_ENDPOINT_TYPE specifies the endpoint type to use for the endpoints
 # in the Keystone service catalog. Use this setting when Horizon is running
