@@ -1,0 +1,6 @@
+---
+docker:
+  enabled: true
+
+nova:
+  compute_driver: docker.DockerDriver

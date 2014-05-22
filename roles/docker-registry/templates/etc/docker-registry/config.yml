@@ -1,0 +1,13 @@
+# The `common' part is automatically included (and possibly overriden by all
+# other flavors)
+common:
+    # Let gunicorn set this environment variable or set a random string here
+    secret_key: _env:SECRET_KEY
+
+# This flavor stores the images in Glance (to integrate with openstack)
+# See also: https://github.com/dotcloud/openstack-docker
+openstack:
+    storage: glance
+    storage_alternate: local
+    storage_path: /var/lib/docker-registry
+    loglevel: debug

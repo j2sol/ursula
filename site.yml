@@ -81,6 +81,17 @@
     - service: name=neutron-openvswitch-agent state=started
       when: neutron.plugin == 'ovs'
 
+# docker components should come before nova if enabled
+- name: docker-registry if enabled
+  hosts: controller
+  roles:
+    - docker-registry
+
+- name: docker if enabled
+  hosts: compute
+  roles:
+    - docker
+
 - name: nova code and config
   hosts: controller:db:compute
   vars_files:

@@ -24,7 +24,7 @@
 
 - name: ensure kvm is supported by cpu and enabled in bios
   command: kvm-ok
-  when: "'{{ nova.libvirt_type }}' == 'kvm'"
+  when: "'{{docker.enabled }}' == 'false' and '{{ nova.libvirt_type }}' == 'kvm'"
   changed_when: False
 
 - name: shutdown default libvirt network is started
@@ -33,7 +33,7 @@
   file: dest=/etc/libvirt/qemu/networks/autostart/default.xml state=absent
 
 # Ensure roles/nova-common/tasks/main.yml runs first, otherwise this will not be a system user
-- user: name=nova groups=libvirtd system=yes createhome=no
+- user: name=nova groups={{ 'libvirtd,docker' if docker.enabled else 'libvirtd' }} system=yes createhome=no
 
 - file: dest=/var/lib/nova/instances state=directory owner=nova
 
