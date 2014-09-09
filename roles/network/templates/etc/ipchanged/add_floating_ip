@@ -10,3 +10,5 @@ done
 
 export HOSTNAME=$( hostname )
 /usr/local/bin/migrate_neutron_services
+sleep 5
+/usr/local/bin/neutron-restart-all
