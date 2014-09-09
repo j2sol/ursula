@@ -1,0 +1,7 @@
+#!/bin/bash
+
+restart neutron-server
+restart neutron-openvswitch-agent
+restart neutron-dhcp-agent
+restart neutron-l3-agent
+restart neutron-metadata-agent

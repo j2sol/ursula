@@ -48,3 +48,9 @@
 - template: src=etc/ipchanged/add_internal_floating_ip dest=/etc/ipchanged/{{ hostvars[inventory_hostname][primary_interface].device }}/{{ undercloud_floating_ip }}/add mode=0755
 
 - service: name=ipchanged state=started
+
+- name: neutron-restart-all helper script
+  template: src=usr/local/bin/neutron-restart-all dest=/usr/local/bin/neutron-restart-all mode=0755
+
+- name: ucarp-start helper script
+  template: src=usr/local/bin/ucarp-start dest=/usr/local/bin/ucarp-start mode=0755

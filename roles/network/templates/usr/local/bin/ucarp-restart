@@ -1,0 +1,23 @@
+#!/bin/bash
+#
+# ucarp-start
+# an ursula utility to restart ucarp
+
+set -e
+
+ifquery --list | while read IFACE
+do
+    IFCONFIG=$(tempfile)
+    ifquery ${IFACE} > ${IFCONFIG}
+    if grep -q ucarp-vip ${IFCONFIG}; then
+        IF_UCARP_VID=$(awk '/^ucarp-vid:/ {print $2}' ${IFCONFIG})
+        IF_UCARP_VIP=$(awk '/^ucarp-vip:/ {print $2}' ${IFCONFIG})
+        IF_UCARP_PASSWORD=$(awk '/^ucarp-password:/ {print $2}' ${IFCONFIG})
+        IF_ADDRESS=$(awk '/^address:/ {print $2}' ${IFCONFIG})
+ 
+        if ! ps aux | grep /usr/sbin/ucarp | grep -q ${IFACE}; then
+            . /etc/network/if-up.d/ucarp
+        fi
+    fi
+    unlink ${IFCONFIG}
+done
