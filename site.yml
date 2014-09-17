@@ -3,52 +3,6 @@
   roles:
     - common
 
-- name: rabbitmq used by openstack
-  hosts: controller
-  serial: 1
-  roles:
-    - rabbitmq
-
-- name: install common percona components and gather facts
-  hosts: db
-  roles:
-    - percona-common
-
-- name: install percona on primary
-  hosts: db[0]
-  vars:
-    should_bootstrap_as_primary: True
-  roles:
-    - percona-server
-
-- name: install percona on secondaries
-  hosts: db:!db[0]
-  vars:
-    should_bootstrap_as_primary: False
-  roles:
-    - percona-server
-
-- name: install percona arbiter
-  hosts: db_arbiter
-  roles:
-    - percona-common
-    - percona-arbiter
-
-- name: configure percona backups on primary
-  hosts: db[0]
-  roles:
-    - percona-backup
-
-- name: memcached for keystone and horizon
-  hosts: controller
-  roles:
-    - memcached
-
-- name: keystone code and config
-  hosts: controller:db
-  roles:
-    - keystone-common
-
 - name: neutron code and config
   hosts: controller:db:compute:network
   vars_files:
@@ -59,11 +13,6 @@
 - hosts: network:compute
   roles:
     - openvswitch
-
-- name: openstack network services
-  hosts: network
-  roles:
-    - network
 
 - name: start neutron-openvswitch-agent
   hosts: network:compute
@@ -77,30 +26,6 @@
   roles:
     - nova-common
 
-- name: swift common code and config
-  hosts: swiftnode
-  roles:
-    - swift-common
-
-- name: swift bootstrap rings
-  hosts: swiftnode_primary
-  roles:
-    - swift-ring
-
-- name: swift code and config
-  hosts: swiftnode
-  roles:
-    - haproxy
-    - swift-object
-    - swift-account
-    - swift-container
-    - swift-proxy
-
-- name: glance code and config
-  hosts: controller:db
-  roles:
-    - glance-common
-
 - name: cinder code and config
   hosts: controller:db:compute
   vars_files:
@@ -108,41 +33,15 @@
   roles:
     - cinder-common
 
-- name: heat code and config
-  hosts: controller
-  roles:
-    - heat
-
-- name: dbs, db users, db schema updates
-  hosts: db[0]
-  roles:
-    - db
-
 - name: openstack client tools
   hosts: all
   roles:
     - client
 
-- name: openstack controller services
-  hosts: controller
-  roles:
-    - horizon
-    - haproxy
-    - controller
-
 - hosts: compute
   roles:
     - compute
     - cinder-volume
-
-- hosts: controller[0]
-  roles:
-    - openstack-setup
-
-- name: restart neutron-openvswitch-agent to ensure VXLAN mesh is configured
-  hosts: network:compute
-  tasks:
-    - service: name=neutron-openvswitch-agent state=restarted
 
 - name: Install monitoring
   include: playbooks/monitoring.yml
