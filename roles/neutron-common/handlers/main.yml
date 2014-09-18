@@ -10,10 +10,11 @@
   command: rsync -avh /opt/stack/neutron/etc/neutron/rootwrap.d /etc/neutron
 
 - name: restart neutron services
-  restart_if_running: service={{ item }}
-  with_items:
-    - neutron-server
-    - neutron-dhcp-agent
-    - neutron-l3-agent
-    - neutron-lbaas-agent
-    - neutron-openvswitch-agent
+  # restart_if_running: service={{ item }}
+  command: echo "NOOP"
+  # with_items:
+    # - neutron-server
+    # - neutron-dhcp-agent
+    # - neutron-l3-agent
+    # - neutron-lbaas-agent
+    # - neutron-openvswitch-agent
