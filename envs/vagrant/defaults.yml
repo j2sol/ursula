@@ -69,7 +69,7 @@ monitoring:
   scan_for_log_errors: true
 
 openstack:
-  pypi_mirror: http://pypi.openstack.org/openstack
+  pypi_mirror: https://pypi.python.org/simple/
   git_mirror:  http://git-mirror.openstack.blueboxgrid.com
   git_update: yes
 
