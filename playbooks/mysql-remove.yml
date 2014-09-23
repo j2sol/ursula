@@ -1,0 +1,16 @@
+#
+# This playbook removes mysql from the controllers and the arbiter
+#
+---
+- hosts: controller
+  tasks:
+  - apt: name="percona*" state=absent
+
+  - file: path=/etc/mysql state=absent
+  - file: path=/root/.my.cnf state=absent
+
+- hosts: db_arbiter
+  tasks:
+  - apt: name="percona*" state=absent
+
+
