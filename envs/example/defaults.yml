@@ -334,3 +334,10 @@ common:
 
 heat:
   enabled: True
+
+docker:
+  enabled: False
+
+novadocker:
+  enabled: False
+

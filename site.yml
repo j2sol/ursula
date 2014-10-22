@@ -81,23 +81,22 @@
     - service: name=neutron-openvswitch-agent state=started
       when: neutron.plugin == 'ovs'
 
-# docker components should come before nova if enabled
-- name: docker-registry if enabled
-  hosts: controller
-  roles:
-    - docker-registry
-
-- name: docker if enabled
-  hosts: compute
-  roles:
-    - docker
-
 - name: nova code and config
   hosts: controller:db:compute
   vars_files:
     - roles/rabbitmq/defaults/main.yml
   roles:
     - nova-common
+
+- name: docker if enabled
+  hosts: controller:compute
+  roles:
+    - docker
+
+- name: novadocker if enabled
+  hosts: controller:compute
+  roles:
+    - novadocker
 
 - name: swift common code and config
   hosts: swiftnode
@@ -125,16 +124,16 @@
 
 - name: cinder code and config
   hosts: controller:cinder_volume
-  vars_files:      
+  vars_files:
     - roles/rabbitmq/defaults/main.yml
-  roles:           
+  roles:
     - cinder-common
 
 - name: cinder-volume code and config
   hosts: cinder_volume
-  vars_files:      
+  vars_files:
     - roles/rabbitmq/defaults/main.yml
-  roles:           
+  roles:
     - cinder-volume
 
 - name: heat code and config

@@ -1,4 +1,0 @@
----
-docker-registry:
-  repourl: https://github.com/dotcloud/docker-registry.git
-  rev: 0.6.8

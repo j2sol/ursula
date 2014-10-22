@@ -1,9 +1,0 @@
----
-- name: create docker-registry virtualenv
-  action: command virtualenv /opt/docker-registry/.venv
-
-- name: install docker-registry
-  action: command /opt/docker-registry/.venv/bin/pip install -r /opt/docker-registry/requirements.txt
-
-- name: restart docker-registry
-  restart_if_present: service=docker-registry

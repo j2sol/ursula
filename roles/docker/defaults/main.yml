@@ -1,4 +1,4 @@
 ---
 docker:
   enabled: false
-  mirror: "deb http://get.docker.io/mirror.yandex.ru/mirrors/docker/ docker main"
+  mirror: "deb https://get.docker.com/ubuntu docker main"
