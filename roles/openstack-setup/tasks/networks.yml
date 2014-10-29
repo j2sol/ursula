@@ -12,9 +12,7 @@
       auth_url=https://{{ endpoints.main }}:5001/v2.0/
       login_tenant_name=admin
       login_password={{ secrets.admin_password }}
-      {% if client.self_signed_cert -%}
       cacert=/opt/stack/ssl/openstack.crt
-      {% endif -%}
   with_items: neutron.networks
 
 - name: neutron subnets
@@ -30,15 +28,7 @@
       auth_url=https://{{ endpoints.main }}:5001/v2.0/
       login_tenant_name=admin
       login_password={{ secrets.admin_password }}
-      {% if item.allocation_pool_start is defined -%}
-      allocation_pool_start={{ item.allocation_pool_start }}
-      {% endif -%}
-      {% if item.allocation_pool_end is defined -%}
-      allocation_pool_end={{ item.allocation_pool_end }}
-      {% endif -%}
-      {% if client.self_signed_cert -%}
       cacert=/opt/stack/ssl/openstack.crt
-      {% endif -%}
   with_items: neutron.subnets
 
 - name: neutron routers
@@ -51,9 +41,7 @@
       auth_url=https://{{ endpoints.main }}:5001/v2.0/
       login_tenant_name=admin
       login_password={{ secrets.admin_password }}
-      {% if client.self_signed_cert -%}
       cacert=/opt/stack/ssl/openstack.crt
-      {% endif -%}
   with_items: neutron.routers
 
 - name: neutron routers gateways
@@ -65,9 +53,7 @@
       auth_url=https://{{ endpoints.main }}:5001/v2.0/
       login_tenant_name=admin
       login_password={{ secrets.admin_password }}
-      {% if client.self_signed_cert -%}
       cacert=/opt/stack/ssl/openstack.crt
-      {% endif -%}
   with_items: neutron.routers
 
 - name: neutron router interfaces
@@ -80,7 +66,5 @@
       auth_url=https://{{ endpoints.main }}:5001/v2.0/
       login_tenant_name=admin
       login_password={{ secrets.admin_password }}
-      {% if client.self_signed_cert -%}
       cacert=/opt/stack/ssl/openstack.crt
-      {% endif -%}
   with_items: neutron.router_interfaces
