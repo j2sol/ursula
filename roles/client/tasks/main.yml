@@ -3,13 +3,7 @@
   template: src=root/stackrc dest=/root/stackrc
 
 - name: keystone-client
-  git: |
-    repo={{ openstack.git_mirror }}/python-keystoneclient.git
-    dest=/opt/stack/python-keystoneclient
-    version={{ client.keystoneclient_rev }}
-    update={{ openstack.git_update }}
-  notify:
-    - pip install keystoneclient
+  pip: name=python-keystoneclient version=0.4.1 extra_args='-i {{ openstack.pypi_mirror }}'
 
 - name: glance-client
   git: |
