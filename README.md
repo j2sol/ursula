@@ -28,11 +28,7 @@ Add your hosts to the inventory:
 
 # Getting Started
 
-Ursula comes bundled with Vagrant hooks to get started.  Once you've installed the pre-requesite software, you can get up and running with:
-
-```
-./bin/run_vagrant
-```
+Ursula comes bundled with Vagrant hooks to get started.  see [docs/vagrant.md](docs/vagrant.md) for using it.
 
 # Basic Usage
 
