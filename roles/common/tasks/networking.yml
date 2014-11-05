@@ -6,9 +6,6 @@
   when: network_interfaces_d is defined
   with_items: network_interfaces_d
 
-- template: src=etc/hosts dest=/etc/hosts owner=root group=root mode=0644 backup=yes
-
-
 - template: src=etc/sysctl.d/60-netfilter-tuning.conf dest=/etc/sysctl.d/60-netfilter-tuning.conf owner=root group=root mode=0644
   notify:
     - apply-sysctl
