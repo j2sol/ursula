@@ -3,6 +3,8 @@
 Ursula provides a series of Ansible playbooks for installing, managing and
 maintaining OpenStack powered clouds.
 
+derp
+
 Ursula was originally created by a team at [Blue Box](https://www.blueboxcloud.com) and is
 released under the MIT License (MIT).
 
