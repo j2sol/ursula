@@ -555,8 +555,8 @@ common:
     mcelog: False
   ursula_monitoring:
     method: tar # git|tar
-    tar_url: https://file-mirror.openstack.blueboxgrid.com/ursula-monitoring/master.tar.gz
-    tar_version: master
+    tar_url: https://file-mirror.openstack.blueboxgrid.com/ursula-monitoring/RELEASE-2.0.x.tar.gz
+    tar_version: RELEASE-2.0.x
   ntpd:
     servers: []
     #  - servertime.service.softlayer.com

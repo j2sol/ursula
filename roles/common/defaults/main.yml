@@ -27,9 +27,9 @@ common:
     path: /opt/ursula-monitoring
     method: git # git|tar
     git_repo: https://github.com/blueboxgroup/ursula-monitoring.git
-    git_rev: master
-    tar_url: https://github.com/blueboxgroup/ursula-monitoring/archive/master.tar.gz
-    tar_version: master
+    git_rev: RELEASE-2.0.x
+    tar_url: https://github.com/blueboxgroup/ursula-monitoring/archive/RELEASE-2.0.x.tar.gz
+    tar_version: RELEASE-2.0.x
   system_tools:
     mcelog: True
   packages_to_remove:
