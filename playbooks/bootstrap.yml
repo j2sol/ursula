@@ -27,7 +27,6 @@
     - linux-generic-lts-quantal
     - linux-headers-generic-lts-quantal
     - linux-image-generic-lts-quantal
-    - openvswitch-datapath-dkms
     when: ansible_distribution_version == "12.04"
 
   - apt: cache_valid_time=3600 update_cache=yes
@@ -35,7 +34,6 @@
     with_items:
     - vlan
     - ucarp
-    - openvswitch-switch
   - apt: upgrade=dist
 
   # Set Locale
