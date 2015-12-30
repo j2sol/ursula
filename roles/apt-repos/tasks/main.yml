@@ -1,10 +1,13 @@
 ---
 - name: add any dependent repository keys from url
   apt_key:
-    url: "{{ item.key_url }}"
-    validate_certs: "{{ item.validate_certs|default(omit) }}"
+    url: "{{ item.key_url | default(omit) }}"
+    validate_certs: "{{ item.validate_certs | default(omit) }}"
+    keyserver: "{{ item.key_server | default(omit) }}"
+    id: "{{ item.id | default(omit) }}"
   with_items: repos
-  when: repos is defined and item.key_url is defined
+  when: repos is defined and
+        (item.key_url is defined or item.keyserver is defined)
 
 # things like keyrings may come as packages vs. keys
 - name: add any dependent repository key packages
