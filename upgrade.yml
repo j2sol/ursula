@@ -1,8 +1,7 @@
 # Play for upgrading from one version of OpenStack to another.
-# Heavily flavored for Havana to Juno for now, but useful as a model for
-# future upgrades. NOT a rolling upgrade optimized for downtime.
+# NOT a rolling upgrade optimized for downtime.
 #
-# Assumes ml2 networking
+# Assumes a modern percona cluster and a Juno starting point
 ---
 - name: Remove existing package symlink
   hosts: all
@@ -14,18 +13,14 @@
         state: absent
       when: openstack_install_method == 'package'
 
-- name: Upgrade kernel to supported HWE
-  hosts: all
-  max_fail_percentage: 1
-  tags: kernelupgrade
-
+- name: Ensure backup dir on controllers
+  hosts: controller
+  gather_facts: false
   tasks:
-    - name: upgrade kernel to trusty lts
-      apt: pkg={{ item }}
-      with_items:
-        - linux-generic-lts-trusty
-        - linux-tools-lts-trusty
-      when: ansible_distribution_version == "12.04"
+    - name: ensure backup dir
+      file:
+        path: /backup
+        state: directory
 
 - name: upgrade common bits first
   hosts: all
@@ -34,72 +29,26 @@
   roles:
     - role: common
 
-- name: upgrade percona cluster in compat mode
-  hosts: db
-  max_fail_percentage: 1
-  tags: dbupgrade
-  serial: 1
-
-  tasks:
-    - name: check db version
-      command: mysql -V
-      changed_when: False
-      register: mysqlver
-
-    - include: upgrade-db-cluster.yml
-      when: not mysqlver.stdout|search('Distrib 5\.6')
-
-- name: upgrade percona arbiter
-  hosts: db_arbiter
-  max_fail_percentage: 1
-  tags: dbupgrade
-
-  pre_tasks:
-    - name: purge old garbd and configs
-      apt: name=percona-xtradb-cluster-garbd-2.x state=absent purge=true
-
-    - name: remove old garb config
-      file: path=/etc/default/garb state=absent
-
-    - name: garbd.log permissions
-      file: path=/var/log/garbd.log owner=nobody state=touch
-
-  roles:
-    - role: percona-common
-
-    - role: percona-arbiter
-
-- name: remove percona compat settings
-  hosts: db
-  max_fail_percentage: 1
-  tags: dbupgrade
-  serial: 1
-
-  tasks:
-    - name: remove compat settings
-      lineinfile: regexp="{{ item }}" state=absent
-                  dest=/etc/mysql/conf.d/replication.cnf
-      with_items:
-        - '^wsrep_provider_options\s*='
-        - '^log_bin_use_v1_row_events\s*='
-        - '^gtid_mode\s*='
-        - '^binlog_checksum\s*='
-        - '^read_only\s*='
-      notify: restart mysql
-
-  handlers:
-    - name: restart mysql
-      service: name=mysql state=restarted
-
-- name: upgrade rabbitmq
-  gather_facts: force
+- name: upgrade keystone
   hosts: controller
   max_fail_percentage: 1
-  tags: rabbitmq
-  serial: 1
+  tags: keystone
+
+  pre_tasks:
+    - name: dump keystone db
+      mysql_db:
+        name: keystone
+        state: dump
+        target: /backup/keystone-preupgrade.sql
+      run_once: True
+      tags: dbdump
 
   roles:
-    - role: rabbitmq
+    - role: keystone
+      force_sync: true
+      restart: False
+      database_create:
+        changed: False
 
 - name: upgrade glance
   hosts: controller
@@ -203,6 +152,12 @@
   tags:
     - nova
     - nova-data
+
+  pre_tasks:
+    - name: clear out novnc
+      file:
+        path: /usr/share/novnc
+        state: absent
 
   roles:
     - role: nova-data
@@ -315,20 +270,6 @@
       run_once: True
       tags: dbdump
 
-    - name: check db version
-      command: neutron-db-manage --config-file /etc/neutron/neutron.conf
-               --config-file /etc/neutron/plugins/ml2/ml2_plugin.ini
-               current
-      register: neutron_db_ver
-      run_once: True
-
-    - name: stamp neutron to havana
-      command: neutron-db-manage --config-file /etc/neutron/neutron.conf
-               --config-file /etc/neutron/plugins/ml2/ml2_plugin.ini
-               stamp havana
-      when: not neutron_db_ver.stdout|search('juno')
-      run_once: True
-
   roles:
     - role: neutron-control
       force_sync: true
@@ -396,27 +337,6 @@
 
     - role: swift-proxy
       tags: ['openstack', 'swift', 'control']
-
-- name: upgrade keystone
-  hosts: controller
-  max_fail_percentage: 1
-  tags: keystone
-
-  pre_tasks:
-    - name: dump keystone db
-      mysql_db:
-        name: keystone
-        state: dump
-        target: /backup/keystone-preupgrade.sql
-      run_once: True
-      tags: dbdump
-
-  roles:
-    - role: keystone
-      force_sync: true
-      restart: False
-      database_create:
-        changed: False
 
 - name: upgrade horizon
   hosts: controller
