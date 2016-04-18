@@ -111,16 +111,6 @@
 
 # Reboot checks
 - include: ha.yml
-  # converged controllers; expression evaluates boolean true
-  when: groups['compute'] | intersect(groups['controller']) | length > 0
-  vars:
-    converged: yes
-
-- include: ha.yml
-  # dedicated controllers; expression evaluates boolean false
-  when: not groups['compute'] | intersect(groups['controller']) | length == 0
-  vars:
-    converged: no
 
 # Check post reboots
 - include: node_interconnectivity.yml

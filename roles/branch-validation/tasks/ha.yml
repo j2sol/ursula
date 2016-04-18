@@ -12,69 +12,88 @@
     state: absent
   failed_when: false
 
-- name: add floating IPs to instances on controllers
+- name: add floating IPs to instances
   os_floating_ip:
     auth: "{{ auth }}"
     network: external
     server: "validate-{{ item }}"
     reuse: true
-  register: fip_controllers
-  with_items: groups['controller']
-  when: converged
+  register: fip_all
+  with_items: groups['compute']
 
 - name: floating ips are reachable
   command: "ping -c 5 {{ item.floating_ip.floating_ip_address }}"
-  with_items: fip_controllers.results
+  with_items: fip_all.results
   register: pings
   until: pings|success
   delay: 1
   retries: 5
   become: no
   delegate_to: localhost
-  when: converged
 
-- name: add floating IP to a non-controller instance
-  os_floating_ip:
-    auth: "{{ auth }}"
-    network: external
-    server: "validate-{{ item }}"
-    reuse: true
-  register: fip_compute
-  ignore_errors: yes
-  with_items:
-    - "{{ (groups['compute'][1:]|difference(groups['controller']))[0] }}"
-  when: not converged
+- name: set controller master
+  set_fact: controller_master={{ item }}
+  when: floating_ip in hostvars[item]['ansible_all_ipv4_addresses']
+  with_items: "{{ groups['controller'] }}"
+  run_once: true
 
-- name: floating ips are reachable
-  command: "ping -c 5 {{ item.floating_ip.floating_ip_address }}"
-  with_items: fip_compute.results
-  register: pings
-  until: pings|success
-  delay: 10
-  retries: 5
-  become: no
-  delegate_to: localhost
-  when: not converged
-
-# initiate hard reboot on controller 0
-- name: reboot controller 0
+# initiate hard reboot on controller master
+- name: reboot controller master
   shell: shutdown -r now
+  delegate_to: "{{ controller_master }}"
 
-- name: wait for the panic controller 0
+- name: wait for the panic controller master
   wait_for:
-    host: "{{ inventory_hostname }}"
+    host: "{{ controller_master }}"
     port: 22
     state: stopped
     delay: 10
     timeout: 30
-  delegate_to: "{{ groups['controller'][1] }}"
-  when: master
+  delegate_to: "{{ groups['controller'][controller_master - 1] }}"
 
 # Check API
 - include: api.yml
 
-- include: converged.yml
-  when: converged
+- name: floating ips are reachable (remaining)
+  command: "ping -c 5 {{ item.floating_ip.floating_ip_address }}"
+  when: item.item != controller_master
+  with_items: fip_all.results
+  register: pings
+  until: pings|success
+  delay: 1
+  retries: 5
+  become: no
+  delegate_to: localhost
 
-- include: dedicated.yml
-  when: not converged
+- name: pick valid floating IP
+  set_fact: valid_floater={{ item.floating_ip.floating_ip_address }}
+  when: item.item != controller_master
+  with_items: fip_all.results
+
+- include: node_internet_connectivity.yml
+  vars:
+    ip_addr: "{{ valid_floater }}"
+
+- name: wait for the controller master to come online
+  wait_for:
+    host: "{{ controller_master }}"
+    port: 22
+    delay: 10
+    timeout: 300
+
+# Check API
+- include: api.yml
+
+- name: floating ips are reachable
+  command: "ping -c 5 {{ item.floating_ip.floating_ip_address }}"
+  with_items: fip_all.results
+  register: pings
+  until: pings|success
+  delay: 1
+  retries: 5
+  become: no
+  delegate_to: localhost
+
+- include: node_internet_connectivity.yml
+  vars:
+    ip_addr: "{{ valid_floater }}"
