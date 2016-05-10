@@ -1,16 +1,17 @@
 ---
 - name: neutron networks
-  neutron_network: name={{ item.name }}
-                   provider_network_type={{ item.network_type }}
-                   state=present
-                   shared={{ item.shared }}
-                   router_external={{ item.external }}
-                   provider_segmentation_id={{ item.segmentation_id }}
-                   provider_physical_network={{ item.provider_physical_network }}
-                   auth_url={{ endpoints.auth_uri }}
-                   login_tenant_name=admin
-                   login_username=admin
-                   login_password={{ secrets.admin_password }}
+  os_network:
+    name: "{{ item.name }}"
+    provider_network_type: "{{ item.network_type }}"
+    shared: "{{ item.shared }}"
+    external: "{{ item.external }}"
+    provider_segmentation_id: "{{ item.segmentation_id }}"
+    provider_physical_network: "{{ item.provider_physical_network }}"
+    auth:
+      auth_url: "{{ endpoints.auth_uri }}"
+      project_name: admin
+      username: admin
+      password: "{{ secrets.admin_password }}"
   with_items: "{{ neutron.networks }}"
   run_once: true
 
@@ -37,26 +38,16 @@
   run_once: true
 
 - name: neutron routers
-  neutron_router: state=present
-                  name={{ item.name }}
-                  tenant_name={{ item.tenant_name }}
-                  admin_state_up=true
-                  auth_url={{ endpoints.auth_uri }}
-                  login_tenant_name=admin
-                  login_username=admin
-                  login_password={{ secrets.admin_password }}
-  with_items: "{{ neutron.routers }}"
-  run_once: true
-
-- name: neutron routers gateways
-  neutron_router_gateway: state=present
-                          router_name={{ item.name }}
-                          network_name={{ item.ext_network|default("external") }}
-                          enable_snat={{ item.enable_snat|default(true) }}
-                          auth_url={{ endpoints.auth_uri }}
-                          login_tenant_name=admin
-                          login_username=admin
-                          login_password={{ secrets.admin_password }}
+  os_router:
+    name: "{{ item.name }}"
+    admin_state_up: true
+    enable_snat: "{{ item.enable_snat|default(true) }}"
+    network: "{{ item.ext_network|default("external") }}"
+    auth:
+      auth_url: "{{ endpoints.auth_uri }}"
+      project_name: admin
+      username: admin
+      password: "{{ secrets.admin_password }}"
   with_items: "{{ neutron.routers }}"
   run_once: true
 
