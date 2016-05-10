@@ -12,9 +12,12 @@
   when: logging.install_method == 'apt'
 
 - name: stop logstash-forwarder service
-  service: name=logstash-forwarder state=stopped enabled=yes
+  service:
+    name: logstash-forwarder
+    state: stopped
+    enabled: yes
+    must_exist: False
   register: lsfstop
-  failed_when: lsfstop|failed and ("service not found" not in lsfstop.msg)
 
 - name: download logstash
   get_url: url={{ logging.download.url }}
