@@ -1,21 +1,29 @@
 ---
 - name: fetch rados.py
-  get_url:
-    url: "{{ ceph.rados_url }}"
-    dest: /opt/openstack/current/cinder/lib/python2.7/site-packages/rados.py
+  command: wget "{{ ceph.rados_url }}"
+    args:
+      chdir: /opt/openstack/current/cinder/lib/python2.7/site-packages/
+      creates: /opt/openstack/current/cinder/lib/python2.7/site-packages/rados.py
+
+- name: rados.py perms
+  file:
+    path: /opt/openstack/current/cinder/lib/python2.7/site-packages/rados.py
     owner: root
     group: root
     mode: 0644
-    timeout: 30
 
 - name: fetch rbd.py
-  get_url:
-    url: "{{ ceph.rbd_url }}"
-    dest: /opt/openstack/current/cinder/lib/python2.7/site-packages/rbd.py
+  command: wget "{{ ceph.rbd_url }}"
+    args:
+      chdir: /opt/openstack/current/cinder/lib/python2.7/site-packages/
+      creates: /opt/openstack/current/cinder/lib/python2.7/site-packages/rbd.py
+
+- name: rbd.py perms
+  file::
+    path: /opt/openstack/current/cinder/lib/python2.7/site-packages/rbd.py
     owner: root
     group: root
     mode: 0644
-    timeout: 30
 
 - name: fetch cinder keyring
   slurp: path=/etc/ceph/ceph.client.cinder.keyring
