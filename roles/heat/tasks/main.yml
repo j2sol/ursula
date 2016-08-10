@@ -91,7 +91,6 @@
 - name: remove heat domain user from default domain
   environment:
     OS_IDENTITY_API_VERSION: 3
-    OS_DOMAIN_ID: default
   shell: . /root/stackrc; openstack --os-auth-url "{{ endpoints.keystone.url.internal }}/v3" user delete --domain default heat_domain_admin
   register: remove_heat_admin
   failed_when: remove_heat_admin|failed and
@@ -119,7 +118,6 @@
 - name: add admin role to the heat domain admin user
   environment:
     OS_IDENTITY_API_VERSION: 3
-    OS_DOMAIN_ID: default
   shell: . /root/stackrc; openstack --os-auth-url "{{ endpoints.keystone.url.internal }}/v3" role add --domain "{{ heat_domain.domain.id }}" --user "{{ heat_admin_user.user.id }}" admin
   when: heat.enabled|bool and heat_admin_user|changed
   run_once: true
