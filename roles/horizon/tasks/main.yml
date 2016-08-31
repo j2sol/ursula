@@ -22,10 +22,6 @@
 - name: create horizon config directory
   file: dest=/etc/openstack-dashboard state=directory
 
-
-- name: create horizon config directory
-  file: dest=/etc/openstack-dashboard state=directory
-
 - name: openstack dashboard config (12.04)
   template: src=etc/apache2/sites-available/openstack_dashboard.conf
             dest=/etc/apache2/sites-available/openstack_dashboard
