@@ -26,3 +26,14 @@ dependencies:
   - role: openstack-database
     database_name: keystone
   - role: apache
+  - role: apt-repos
+    repos:
+      - repo: 'deb apt_repos.blueboxcloud_misc.repo }} {{ ansible_distribution_release }} main'
+      - key_url: '{{ apt_repos.blueboxcloud_misc.key_url }}'
+    when:
+      - keystone.oidc is defined
+      - keystone.oidc.enabled | default(False)
+      - keystone.oidc.download is defined
+      - keystone.oidc.download.method | default('file') == 'repo'
+    # The default value for this repo does not have the required package,
+    # you'll need to define a value with an appropriate mirror.

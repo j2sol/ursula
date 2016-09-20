@@ -11,6 +11,10 @@ apt_repos:
   blueboxcloud_giftwrap:
     repo: 'https://packagecloud.io/blueboxcloud/giftwrap/ubuntu/'
     key_url: 'https://packagecloud.io/gpg.key'
+  # bluebox_misc is a placeholder URL. It does not have anything useful
+  blueboxcloud_misc:
+    repo: 'https://packagecloud.io/blueboxcloud/giftwrap/ubuntu/'
+    key_url: 'https://packagecloud.io/gpg.key'
   hwraid:
     repo: 'http://hwraid.le-vert.net/ubuntu'
     key_url: 'http://hwraid.le-vert.net/debian/hwraid.le-vert.net.gpg.key'

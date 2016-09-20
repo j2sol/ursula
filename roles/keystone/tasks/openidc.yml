@@ -9,19 +9,30 @@
   until: result|succeeded
   retries: 5
 
-- name: download mod_auth_openidc
-  get_url:
-    url: "{{ keystone.federation.sp.oidc.download.url }}"
-    dest: /tmp/{{ keystone.federation.sp.oidc.module_name }}
-    checksum: "{{ keystone.federation.sp.oidc.download.checksum }}"
+- block:
+  - name: download mod_auth_openidc
+    get_url:
+      url: "{{ keystone.federation.sp.oidc.download.url }}"
+      dest: /tmp/{{ keystone.federation.sp.oidc.module_name }}
+      checksum: "{{ keystone.federation.sp.oidc.download.checksum }}"
 
-- name: install mod_auth_openidc
-  apt: deb=/tmp/{{ keystone.federation.sp.oidc.module_name }}
-       install_recommends=yes
-  notify: reload apache
+  - name: install mod_auth_openidc
+    apt: deb=/tmp/{{ keystone.federation.sp.oidc.module_name }}
+         install_recommends=yes
+    notify: reload apache
+    register: result
+    until: result|succeeded
+    retries: 5
+  - when: keystone.oidc.download.method == 'file'
+
+- name: install oidc plugin via repo
+  apt:
+    name: libapache2-mod-auth-openidc
   register: result
   until: result|succeeded
   retries: 5
+  when: keystone.oidc.download.method == 'repo'
+  notify: reload apache
 
 - name: enable apache mod auth_openidc
   apache2_module: name=auth_openidc
