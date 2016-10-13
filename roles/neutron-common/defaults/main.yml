@@ -71,11 +71,11 @@ neutron:
   service:
     envs: []
   source:
-    rev: 'stable/mitaka'
+    rev: 'stable/newton'
     constrain: True
-    upper_constraints: 'https://raw.githubusercontent.com/openstack/requirements/stable/mitaka/upper-constraints.txt'
+    upper_constraints: 'https://raw.githubusercontent.com/openstack/requirements/stable/newton/upper-constraints.txt'
     python_dependencies:
-      - { name: "git+git://github.com/openstack/neutron-lbaas.git@stable/mitaka#egg=neutron-lbaas" }
+      - { name: "git+git://github.com/openstack/neutron-lbaas.git@stable/newton#egg=neutron-lbaas" }
       - { name: PyMySQL }
     system_dependencies:
       - conntrack
