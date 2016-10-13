@@ -3,9 +3,9 @@ project_name: ceilometer
 ceilometer:
   enabled: False
   source:
-    rev: 'stable/mitaka'
+    rev: 'stable/newton'
     constrain: True
-    upper_constraints: 'https://raw.githubusercontent.com/openstack/requirements/stable/mitaka/upper-constraints.txt'
+    upper_constraints: 'https://raw.githubusercontent.com/openstack/requirements/stable/newton/upper-constraints.txt'
     python_dependencies:
       - { name: pymongo }
       - { name: python-memcached }
