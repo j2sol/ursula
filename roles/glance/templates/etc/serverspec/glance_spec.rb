@@ -1,3 +1,5 @@
+# {{ ansible_managed }}
+
 require 'spec_helper'
 
 files = { "glance-api.conf"=> 640, "glance-api-paste.ini"=> 640, "glance-registry.conf"=> 640, "glance-registry-paste.ini"=> 640, "glance-swift-store.conf"=> 640, "policy.json"=> 644 } 

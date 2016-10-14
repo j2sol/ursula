@@ -21,7 +21,6 @@ glance:
   store_swift: False
   store_ceph: False
   store_file: False
-  show_multiple_locations: True
   source:
     rev: 'stable/newton'
     constrain: True
