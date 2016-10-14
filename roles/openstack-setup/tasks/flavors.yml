@@ -16,7 +16,7 @@
       project_name: admin
       username: admin
       password: "{{ secrets.admin_password  }}"
-  with_items: '{{ ironic.flavors | default([]) }}'
+  with_items: '{{ nova.flavors | default([]) }}'
   when: not ironic.enabled | default(False) | bool
   run_once: true
 
