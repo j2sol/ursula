@@ -276,6 +276,11 @@
       delegate_to: "{{ groups['db'][0] }}"
 
   roles:
+    - role: stop-services
+      services:
+        - nova-cert
+      must_exist: False
+
     - role: nova-control
       force_sync: true
       restart: False

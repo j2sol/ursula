@@ -2,13 +2,22 @@
 - include: novnc.yml
   tags: novnc
 
+- name: remove retired nova controller services
+  upstart_service:
+    name: "{{ item }}"
+    user: nova
+    cmd: /usr/local/bin/{{ item }}
+    config_dirs: /etc/nova
+    state: absent
+  with_items:
+    - nova-cert
+
 - name: install nova controller services
   upstart_service: name={{ item }} user=nova
                    cmd=/usr/local/bin/{{ item }}
                    config_dirs=/etc/nova
   with_items:
     - nova-api
-    - nova-cert
     - nova-conductor
     - nova-consoleauth
     - nova-scheduler
@@ -24,7 +33,6 @@
   service: name={{ item }} state=stopped
   with_items:
     - nova-api
-    - nova-cert
     - nova-conductor
     - nova-consoleauth
     - nova-scheduler
@@ -64,7 +72,6 @@
   service: name={{ item }} state=started
   with_items:
     - nova-api
-    - nova-cert
     - nova-conductor
     - nova-consoleauth
     - nova-scheduler

@@ -4,7 +4,6 @@
   when: restart|default('True')
   with_items:
     - nova-api
-    - nova-cert
     - nova-conductor
     - nova-compute
     - nova-consoleauth

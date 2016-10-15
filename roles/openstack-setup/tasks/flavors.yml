@@ -17,8 +17,8 @@
       username: admin
       password: "{{ secrets.admin_password  }}"
   with_items: '{{ nova.flavors | default([]) }}'
-  when: not ironic.enabled | default(False) | bool
   run_once: true
+  # FIXME flavors are always added, even if it's just an Ironic cloud
 
 - name: Add ironic flavors
   os_nova_flavor:
