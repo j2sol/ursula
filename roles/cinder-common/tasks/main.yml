@@ -29,7 +29,22 @@
     group: cinder
   with_items:
     - /var/cache/cinder
-    - "{{ cinder.state_path }}/lock"
+
+- name: create shared lock path for nova and cinder
+  file:
+    dest: "{{ state_path_base }}/sharedlock"
+    state: directory
+    mode: 0770
+    owner: root
+    group: root
+
+- name: set acls on shared path
+  acl:
+    name: "{{ state_path_base }}/sharedlock"
+    entity: cinder
+    etype: user
+    permissions: rwx
+    state: present
 
 - name: cinder log dir
   file: dest=/var/log/cinder state=directory mode=2750 owner=cinder group=adm
