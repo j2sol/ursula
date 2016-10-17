@@ -4,6 +4,8 @@ keystone:
   token_expiration_in_seconds: 86400
   admin_workers: 5
   public_workers: 5
+  admin_project_name: admin
+  admin_project_domain_name: Default
   source:
     rev: 'stable/newton'
     constrain: True
@@ -11,7 +13,7 @@ keystone:
     python_dependencies:
       - { name: PyMySQL }
       - { name: uwsgi }
-      - { name: python-ldap }
+      - { name: pyldap }
       - { name: ldappool }
     system_dependencies:
       - openssl
