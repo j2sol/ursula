@@ -39,3 +39,5 @@ innodb_autoinc_lock_mode = 2
 innodb_locks_unsafe_for_binlog = 1
 # only keep 2 gcache page storage
 wsrep_provider_options="gcache.size=1G; gcache.keep_pages_count=2"
+# Allow creating functions (required for keystone migrations)
+log_bin_trust_function_creators = 1

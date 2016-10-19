@@ -1,11 +1,15 @@
 ---
+# Perform restarts serially as to not take a subservice completely offline.
+# Only really matters for nova-api, fix this up later.
 - name: restart nova services
-  service: name={{ item }} state=restarted must_exist=false
+  service:
+    name: "{{ item[1] }}"
+    state: restarted
+    must_exist: false
+  run_once: True
+  delegate_to: "{{ item[0] }}"
   when: restart|default('True')
-  with_items:
-    - nova-api
-    - nova-conductor
-    - nova-compute
-    - nova-consoleauth
-    - nova-novncproxy
-    - nova-scheduler
+  with_nested:
+    - "{{ play_hosts }}"
+    - ['nova-api', 'nova-conductor', 'nova-compute',
+       'nova-consoleauth', 'nova-novncproxy', 'nova-scheduler']

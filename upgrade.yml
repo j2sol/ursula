@@ -44,7 +44,7 @@
     - role: common
   environment: "{{ env_vars|default({}) }}"
 
-- name: upgrade rabbit for security
+- name: upgrade rabbit for security and performance
   hosts: controller
   serial: 1
   max_fail_percentage: 1
@@ -67,6 +67,44 @@
         state: restarted
   environment: "{{ env_vars|default({}) }}"
 
+# Do the db stuff so we have latest settings
+- name: install common percona components and gather facts
+  hosts: db
+  any_errors_fatal: true
+  roles:
+    - role: percona-common
+      tags: ['infra', 'percona', 'percona-facts']
+  environment: "{{ env_vars|default({}) }}"
+
+- name: install percona on primary
+  hosts: db[0]
+  any_errors_fatal: true
+  vars:
+    should_bootstrap_as_primary: True
+  roles:
+    - role: percona-server
+      tags: ['infra', 'percona', 'percona-primary']
+  environment: "{{ env_vars|default({}) }}"
+
+- name: install percona on secondaries
+  hosts: db:!db[0]
+  any_errors_fatal: true
+  vars:
+    should_bootstrap_as_primary: False
+  roles:
+    - role: percona-server
+      tags: ['infra', 'percona', 'percona-secondary']
+  environment: "{{ env_vars|default({}) }}"
+
+- name: install percona arbiter
+  hosts: db_arbiter
+  any_errors_fatal: true
+  roles:
+    - role: percona-arbiter
+      tags: ['infra', 'percona']
+  environment: "{{ env_vars|default({}) }}"
+
+## OpenStack stuff now
 - name: upgrade client bits
   hosts: all:!vyatta-*
   max_fail_percentage: 1
@@ -232,33 +270,67 @@
 
   roles:
     - role: keystone
-      force_sync: true
+      force_sync: False
       restart: False
       database_create:
         changed: False
   environment: "{{ env_vars|default({}) }}"
 
-# Nova block
-- name: stage nova compute
-  hosts: compute
+  post_tasks:
+    - block:
+      # These need to be seprate tasks so that expand failure doesn't
+      # continue on to migrate, unlike they would in a loop
+      - name: expand the database
+        command: keystone-manage db_sync --expand
+        run_once: true
+
+      - name: expand the database
+        command: keystone-manage db_sync --migrate
+        run_once: true
+      tags: db-migrate
+
+- name: restart keystone
+  hosts: controller
+  serial: 1
+  max_fail_percentage: 1
+  tags: keystone
+  tasks:
+    - name: disable keystone from haproxy
+      file:
+        path: /etc/keystone/healthcheck_disable
+        state: touch
+
+    - name: wait for haproxy to notice
+      pause:
+        seconds: 8
+
+    - name: restart keystone service
+      service:
+        name: keystone
+        state: restarted
+
+    - name: enable keystone for haproxy
+      file:
+        path: /etc/keystone/healthcheck_disable
+        state: absent
+
+    - name: wait for haproxy to notice
+      pause:
+        seconds: 8
+
+- name: finish keystone upgrade
+  hosts: controller[0]
+  serial: 1
   max_fail_percentage: 1
   tags:
-    - nova
-    - nova-data
+    - keystone
+    - db-migrate
+  tasks:
+    - name: contract the database
+      command: keystone-manage db_sync --contract
 
-  roles:
-    - role: nova-data
-      restart: False
-      when: ironic.enabled == False
-
-    - role: stop-services
-      services:
-        - nova-compute
-      must_exist: False
-      when: ironic.enabled == False
-  environment: "{{ env_vars|default({}) }}"
-
-- name: stage nova control and stop services
+# Nova block
+- name: stage nova control and sync db
   hosts: controller
   max_fail_percentage: 1
   tags:
@@ -288,21 +360,69 @@
         changed: false
   environment: "{{ env_vars|default({}) }}"
 
-- name: start nova compute
+# This is a separate play as it needs multiple tasks. In the future this may
+# be possible with the "listen" capability of handlers so that multiple handers
+# can be notified. But that may not work since we need to do these serially.
+- name: restart nova control services
+  hosts: controller
+  serial: 1
+  max_fail_percentage: 1
+  tags:
+    - nova
+    - nova-control
+  tasks:
+    - name: disable nova-api from haproxy
+      file:
+        path: /etc/nova/healthcheck_disable
+        state: touch
+
+    - name: wait for haproxy to notice
+      pause:
+        seconds: 8
+
+    - name: restart nova services
+      service:
+        name: "{{ item }}"
+        state: restarted
+      with_items:
+        - nova-conductor
+        - nova-api
+        - nova-consoleauth
+        - nova-novncproxy
+        - nova-scheduler
+
+    - name: enable nova-api for haproxy
+      file:
+        path: /etc/nova/healthcheck_disable
+        state: absent
+
+    - name: wait for haproxy to notice
+      pause:
+        seconds: 8
+
+- name: upgrade nova compute
   hosts: compute
   max_fail_percentage: 1
   tags:
     - nova
     - nova-data
 
-  tasks:
-    - name: start nova data services
-      service:
-        name: "{{ item }}"
-        state: started
-      with_items:
-        - nova-compute
+  roles:
+    - role: nova-data
+      restart: True
       when: ironic.enabled == False
+  environment: "{{ env_vars|default({}) }}"
+
+- name: complete online data migrations
+  hosts: controller[0]
+  max_fail_percentage: 1
+  tags:
+    - nova
+    - nova-control
+
+  tasks:
+    - name: perform online nova migrations
+      command: nova-manage db online_data_migrations
 
 # Neutron block
 - name: stage neutron core data

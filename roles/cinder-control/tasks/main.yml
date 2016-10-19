@@ -8,14 +8,6 @@
     - cinder-api
     - cinder-scheduler
 
-- name: stop cinder services before db sync
-  service: name={{ item }} state=stopped
-  with_items:
-    - cinder-api
-    - cinder-scheduler
-  when: database_create.changed or force_sync|default('false')|bool
-  tags: db-migrate
-
 - name: sync cinder database
   command: cinder-manage db sync
   when: database_create.changed or force_sync|default('false')|bool

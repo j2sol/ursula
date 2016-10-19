@@ -90,22 +90,6 @@
 - include: k2k-idp.yml
   when: keystone.federation.enabled|bool and keystone.federation.idp.k2k.enabled|bool
 
-- name: stop keystone service before db sync
-  service: name=keystone state=stopped
-  when: database_create.changed or force_sync|default('false')|bool
-  tags: db-migrate
-
-- name: disable keystone apache site before db sync
-  apache2_site: name=keystone state=absent
-  when: database_create.changed or force_sync|default('false')|bool
-  tags: db-migrate
-
-- name: reload apache to disable keystone before db sync
-  service: name=apache2 state=reloaded
-  register: reloaded
-  when: database_create.changed or force_sync|default('false')|bool
-  failed_when: reloaded|failed and not reloaded.msg|search('Unable to open logs')
-
 - name: sync keystone database
   command: keystone-manage db_sync
   when: database_create.changed or force_sync|default('false')|bool
