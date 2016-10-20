@@ -1,3 +1,5 @@
+# {{ ansible_managed }}
+
 {
 {% if policy_for_horizon|default('False')|bool %}
     "admin_required": "role:admin or is_admin:1 or role:cloud_admin or role:project_admin or rule:owner",
@@ -39,13 +41,13 @@
     "identity:update_endpoint": "rule:admin_required",
     "identity:delete_endpoint": "rule:admin_required",
 
-    "identity:get_domain": "rule:admin_or_cloudadmin or role:project_admin or role:_member_",
+    "identity:get_domain": "rule:admin_or_cloudadmin or role:project_admin or token.project.domain.id:%(target.domain.id)s",
     "identity:list_domains": "rule:admin_or_cloudadmin or role:project_admin",
     "identity:create_domain": "rule:admin_required",
     "identity:update_domain": "rule:admin_required",
     "identity:delete_domain": "rule:admin_required",
 
-    "identity:get_project": "rule:admin_or_cloudadmin or role:project_admin or role:_member_",
+    "identity:get_project": "rule:admin_or_cloudadmin or role:project_admin or project_id:%(target.project.id)s",
     "identity:list_projects": "",
     "identity:list_user_projects": "rule:admin_or_owner_or_cloudadmin or role:project_admin",
     "identity:create_project": "rule:admin_or_cloudadmin",
@@ -184,8 +186,8 @@
     "identity:get_auth_projects": "",
     "identity:get_auth_domains": "",
 
-    "identity:list_projects_for_groups": "",
-    "identity:list_domains_for_groups": "",
+    "identity:list_projects_for_user": "",
+    "identity:list_domains_for_user": "",
 
     "identity:list_revoke_events": "",
 
