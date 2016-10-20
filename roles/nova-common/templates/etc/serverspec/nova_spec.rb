@@ -24,7 +24,7 @@ describe file('/etc/nova/rootwrap.d') do
     it { should be_grouped_into 'root' }
 end
 
-files = {'nova-api.log'=> 'nova', 'nova-cert.log'=> 'nova' , 'nova-conductor.log'=> 'nova', 'nova-consoleauth.log'=> 'nova',
+files = {'nova-api.log'=> 'nova', 'nova-conductor.log'=> 'nova', 'nova-consoleauth.log'=> 'nova',
   'nova-manage.log'=> 'root', 'nova-novncproxy.log'=> 'nova' , 'nova-scheduler.log'=> 'nova', 'nova-compute.log'=> 'nova'}
 files.each do |file, owner|
   if File.exist?("/var/log/nova/#{file}")

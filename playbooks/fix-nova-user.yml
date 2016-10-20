@@ -14,7 +14,6 @@
         - nova-api
         - nova-consoleauth
         - nova-novncproxy
-        - nova-cert
         - nova-scheduler
         - nova-compute
         - nova-conductor
@@ -28,7 +27,6 @@
         - nova-api
         - nova-consoleauth
         - nova-novncproxy
-        - nova-cert
         - nova-scheduler
         - nova-compute
         - nova-conductor

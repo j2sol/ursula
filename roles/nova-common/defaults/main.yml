@@ -63,7 +63,6 @@ nova:
     - nova-api-metadata
     - nova-api-os-compute
     - nova-cells
-    - nova-cert
     - nova-compute
     - nova-conductor
     - nova-console
@@ -84,11 +83,6 @@ nova:
       fields:
         type: openstack
         tags: nova,nova-api
-    - paths:
-        - /var/log/nova/nova-cert.log
-      fields:
-        type: openstack
-        tags: nova,nova-cert
     - paths:
         - /var/log/nova/nova-compute.log
       fields:

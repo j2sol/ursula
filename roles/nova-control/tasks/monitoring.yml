@@ -1,8 +1,15 @@
 ---
+- name: remove retired nova process checks
+  sensu_process_check:
+    service: "{{ item }}"
+    state: absent
+  with_items:
+    - nova-cert
+  notify: restart sensu-client
+
 - name: nova process checks
   sensu_process_check: service={{ item }}
   with_items:
-    - nova-cert
     - nova-conductor
     - nova-consoleauth
     - nova-scheduler
