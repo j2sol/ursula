@@ -21,8 +21,21 @@
 - name: create nova config dir
   file: dest=/etc/nova state=directory
 
-- name: create nova lock dir (and parents)
-  file: dest={{ nova.state_path }}/lock state=directory owner=nova
+- name: create shared lock path for nova and cinder
+  file:
+    dest: "{{ state_path_base }}/sharedlock"
+    state: directory
+    mode: 0770
+    owner: root
+    group: root
+
+- name: set acls on shared path
+  acl:
+    name: "{{ state_path_base }}/sharedlock"
+    entity: nova
+    etype: user
+    permissions: rwx
+    state: present
 
 - name: create nova cache dir
   file: dest=/var/cache/nova state=directory mode=0700 owner=nova group=nova
