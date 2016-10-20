@@ -1,3 +1,4 @@
+# {{ ansible_managed }}
 # -*- coding: utf-8 -*-
 
 import os
@@ -10,7 +11,6 @@ from openstack_dashboard import exceptions
 from openstack_dashboard.settings import HORIZON_CONFIG
 
 DEBUG = False
-TEMPLATE_DEBUG = DEBUG
 COMPRESS_OFFLINE = True
 
 # WEBROOT is the location relative to Webserver root
@@ -329,18 +329,6 @@ OPENSTACK_NEUTRON_NETWORK = {
     'enable_firewall': True,
     'enable_vpn': True,
     'enable_fip_topology_check': True,
-
-    # Neutron can be configured with a default Subnet Pool to be used for IPv4
-    # subnet-allocation. Specify the label you wish to display in the Address
-    # pool selector on the create subnet step if you want to use this feature.
-    'default_ipv4_subnet_pool_label': None,
-
-    # Neutron can be configured with a default Subnet Pool to be used for IPv6
-    # subnet-allocation. Specify the label you wish to display in the Address
-    # pool selector on the create subnet step if you want to use this feature.
-    # You must set this to enable IPv6 Prefix Delegation in a PD-capable
-    # environment.
-    'default_ipv6_subnet_pool_label': None,
 
     # The profile_support option is used to detect if an external router can be
     # configured via the dashboard. When using specific plugins the
