@@ -14,7 +14,8 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
-from ansible.plugins.callback import CallbackBase
+from ansible import constants as C
+from ansible.plugins.callback.default import CallbackModule as CallbackModule_default
 
 
 def secs_to_str(seconds):
@@ -40,7 +41,17 @@ def fill_str(string, fchar="*"):
     return "%s%s " % (string, filler)
 
 
-class CallbackModule(CallbackBase):
+class CallbackModule(CallbackModule_default):
+
+    '''
+    This is the default callback interface, which simply prints messages
+    to stdout when new callback events are received.
+    '''
+
+    CALLBACK_VERSION = 2.0
+    CALLBACK_TYPE = 'stdout'
+    CALLBACK_NAME = 'timestamp'
+
     def __init__(self, *args, **kwargs):
         self.count = 0
         self.stats = {}
@@ -49,8 +60,6 @@ class CallbackModule(CallbackBase):
         super(CallbackModule, self).__init__(*args, **kwargs)
 
     def v2_playbook_on_task_start(self, task, is_conditional):
-        self.timestamp()
-
         if self.current is not None:
             # Record the running time of the last executed task
             self.stats[self.current] = time.time() - self.stats[self.current]
@@ -60,12 +69,42 @@ class CallbackModule(CallbackBase):
         self.stats[self.current] = time.time()
         self.count += 1
 
-    def v2_playbook_on_setup(self):
+        if self._play.strategy != 'free':
+            self._print_task_banner(task)
         self.timestamp()
 
+    def _print_task_banner(self, task):
+        # args can be specified as no_log in several places: in the task or in
+        # the argument spec.  We can check whether the task is no_log but the
+        # argument spec can't be because that is only run on the target
+        # machine and we haven't run it thereyet at this time.
+        #
+        # So we give people a config option to affect display of the args so
+        # that they can secure this if they feel that their stdout is insecure
+        # (shoulder surfing, logging stdout straight to a file, etc).
+        args = ''
+        if not task.no_log and C.DISPLAY_ARGS_TO_STDOUT:
+            args = u', '.join(u'%s=%s' % a for a in task.args.items())
+            args = u' %s' % args
+
+        self._display.banner(u"TASK [%s%s]" % (task.get_name().strip(), args))
+        if self._display.verbosity >= 2:
+            path = task.get_path()
+            if path:
+                self._display.display(u"task path: %s" % path, color=C.COLOR_DEBUG)
+
+        self._last_task_banner = task._uuid
+
     def v2_playbook_on_play_start(self, play):
+        name = play.get_name().strip()
+        if not name:
+            msg = u"PLAY"
+        else:
+            msg = u"PLAY [%s]" % name
+
+        self._play = play
+        self._display.banner(msg)
         self.timestamp()
-        self._display.display(fill_str("", fchar="="))
 
     def v2_playbook_on_stats(self, play):
         self.timestamp()
@@ -95,11 +134,8 @@ class CallbackModule(CallbackBase):
         time_current = time.strftime('%A %d %B %Y  %H:%M:%S %z')
         time_elapsed = secs_to_str(time.time() - self.tn)
         time_total_elapsed = secs_to_str(time.time() - self.t0)
-        self._display.display(
-            fill_str(
-                '%s (%s)       %s' % (time_current,
-                                      time_elapsed,
-                                      time_total_elapsed)
-            )
-        )
+        msg = u"%s (%s)      %s" % (time_current,
+                                    time_elapsed,
+                                    time_total_elapsed)
+        self._display.banner(msg)
         self.tn = time.time()
