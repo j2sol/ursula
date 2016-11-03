@@ -121,6 +121,17 @@
 - name: install root .my.cnf defaults file
   template: src=root/.my.cnf dest=/root/.my.cnf owner=root group=root mode=0600
 
+- name: add mysql user for haproxy health
+  mysql_user:
+    name: haproxy
+    host: "{{ hostvars[item]['ansible_fqdn'] }}"
+  with_items: "{{ groups['controller'] }}"
+
+- name: add fqdn mysql for haproxy health (because haproxy is dumb)
+  mysql_user:
+    name: haproxy
+    host: "{{ fqdn }}"
+
 - name: remove mysql test database
   mysql_db: state=absent name=test
 

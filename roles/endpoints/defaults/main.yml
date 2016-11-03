@@ -2,7 +2,7 @@
 swift_fqdn: "{{ fqdn }}"
 endpoints:
   main: "{{ fqdn }}"
-  db: "{{ undercloud_floating_ip }}"
+  db: "{{ undercloud_floating_ip }}:3307"
   rabbit: "{{ undercloud_floating_ip }}"
   memcache: "{{ undercloud_floating_ip }}:11211"
   magnum: "{{ fqdn }}"
