@@ -56,11 +56,11 @@
 - block:
   - name: upgrade percona to desired version
     apt:
-      pkg: percona-xtradb-cluster-server-{{ xtradb.server_version }}
+      pkg: "{{ item }}"
       state: latest
-    run_once: true
-    delegate_to: "{{ item }}"
-    with_items: "{{ play_hosts }}"
+    with_items:
+      - percona-xtrabackup
+      - percona-xtradb-cluster-server-{{ xtradb.server_version }}
 
   # Make sure the cluster is healthy before moving on
   # NOTE this will fail if we switch to apt packages for sensu plugins!!
@@ -69,9 +69,6 @@
     register: cstat
     until: cstat | succeeded
     retries: 5
-    run_once: true
-    delegate_to: "{{ item }}"
-    with_items: "{{ play_hosts }}"
   when: (dbupgrade | default('False') | bool) or
         (upgrade | default('False') | bool)
 
