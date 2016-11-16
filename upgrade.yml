@@ -413,6 +413,36 @@
       when: ironic.enabled == False
   environment: "{{ env_vars|default({}) }}"
 
+# FIXME these need to be tolerant of failures perhaps, like missing service?
+# Probably needs fixing for ironic too
+- name: hup nova control processes
+  hosts: controller
+  max_fail_percentage: 1
+  tags:
+    - nova
+    - nova-control
+  tasks:
+    - name: send HUP signal to nova control processes
+      command: pkill -HUP -f bin/{{ item }}
+      with_items:
+        - nova-api
+        - nova-conductor
+        - nova-consoleauth
+        - nova-scheduler
+        - nova-novncproxy
+
+- name: hup nova control processes
+  hosts: compute
+  max_fail_percentage: 1
+  tags:
+    - nova
+    - nova-compute
+  tasks:
+    - name: send HUP signal to nova control processes
+      command: pkill -HUP -f bin/{{ item }}
+      with_items:
+        - nova-compute
+
 - name: complete online data migrations
   hosts: controller[0]
   max_fail_percentage: 1
